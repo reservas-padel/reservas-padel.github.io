@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clases de pádel · Vals Sport</title>
+<meta name="description" content="Reserva tu plaza en las clases de pádel de Vals Sport.">
+<meta property="og:title" content="Reservas de pádel · Vals Sport">
+<meta property="og:description" content="Elige día y hora y reserva tu plaza al momento.">
+<meta property="og:image" content="https://valssport.com/wp-content/uploads/2021/07/cropped-FAVI-VALS-180x180.jpg">
+<meta name="theme-color" content="#be1f52">
+<link rel="icon" href="https://valssport.com/wp-content/uploads/2021/07/cropped-FAVI-VALS-32x32.jpg">
+<link rel="apple-touch-icon" href="https://valssport.com/wp-content/uploads/2021/07/cropped-FAVI-VALS-180x180.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Identidad Vals Sport */
+  :root {
+    --magenta: #be1f52; --magenta-osc: #b0004c; --magenta-claro: #fbe9ef;
+    --cian: #1c93ae; --verde: #72962c; --negro: #1d1d1b; --gris-osc: #333333;
+    --gris: #7a7a7a; --fondo: #f4f4f4; --tarjeta: #ffffff; --borde: #e4e4e4;
+    --titulos: "Bebas Neue", "Arial Narrow", Impact, sans-serif;
+    --texto: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--texto); background: var(--fondo); color: var(--gris-osc); font-size: 15px; }
+
+  /* Cabecera tipo web Vals Sport: bloque magenta con logo sobre barra oscura */
+  header { background: var(--negro); color: #fff; }
+  .cab { max-width: 760px; margin: 0 auto; display: flex; align-items: stretch; min-height: 92px; }
+  .marca { background: var(--magenta); display: flex; align-items: center; justify-content: center;
+           padding: 14px 22px; flex: 0 0 auto; }
+  .marca img { height: 58px; width: auto; display: block; }
+  .marca .alt { font-family: var(--titulos); font-size: 2.2rem; letter-spacing: 1px; line-height: 1; }
+  .cab-txt { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 12px 18px; min-width: 0; }
+  .cab-txt h1 { margin: 0; font-family: var(--titulos); font-weight: 400; font-size: 2.1rem; letter-spacing: .5px; line-height: 1; }
+  .cab-txt p { margin: 4px 0 0; font-size: .85rem; color: #cfcfcf; }
+  .franja { height: 5px; background: linear-gradient(90deg, var(--magenta) 0 33.3%, var(--cian) 33.3% 66.6%, var(--verde) 66.6% 100%); }
+  .demo { background: var(--cian); color: #fff; font-weight: 600; text-align: center; padding: 6px 16px; font-size: .8rem; }
+
+  .contenedor { max-width: 760px; margin: 22px auto 30px; padding: 0 16px; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 18px; }
+  .tabs button { flex: 1; border: 2px solid var(--magenta); background: #fff; color: var(--magenta); padding: 9px 10px 7px;
+                 font-family: var(--titulos); font-size: 1.35rem; letter-spacing: .6px; border-radius: 4px; cursor: pointer; }
+  .tabs button.on { background: var(--magenta); color: #fff; }
+
+  h2.dia { font-family: var(--titulos); font-weight: 400; font-size: 1.6rem; letter-spacing: .6px; color: var(--cian);
+           margin: 24px 2px 8px; border-bottom: 2px solid var(--borde); padding-bottom: 4px; }
+  .hueco { display: flex; align-items: center; gap: 16px; background: var(--tarjeta); border: 1px solid var(--borde);
+           border-left: 5px solid var(--verde); border-radius: 4px; padding: 14px 16px; margin-bottom: 10px; }
+  .hora { font-family: var(--titulos); font-size: 2.1rem; line-height: 1; min-width: 70px; color: var(--negro); }
+  .info { flex: 1; min-width: 0; }
+  .clase { font-weight: 600; margin-bottom: 6px; color: var(--negro); }
+  .barra { height: 6px; background: #ececec; border-radius: 3px; overflow: hidden; }
+  .barra span { display: block; height: 100%; background: var(--verde); }
+  .plazas { font-size: .82rem; color: var(--gris); margin-top: 6px; }
+  .plazas b { color: var(--negro); }
+  .pocas { border-left-color: var(--magenta); }
+  .pocas .barra span { background: var(--magenta); }
+  .pocas .plazas { color: var(--magenta); font-weight: 600; }
+  .lleno { border-left-color: #bdbdbd; opacity: .7; }
+  .lleno .barra span { background: #9e9e9e; }
+
+  .btn { border: 0; background: var(--magenta); color: #fff; font-family: var(--titulos); font-size: 1.3rem; letter-spacing: .8px;
+         padding: 9px 20px 7px; border-radius: 4px; cursor: pointer; white-space: nowrap; transition: background .15s; }
+  .btn:hover:not(:disabled) { background: var(--magenta-osc); }
+  .btn:disabled { background: #d6d6d6; color: #8a8a8a; cursor: default; }
+  .btn.sec { background: #ececec; color: var(--gris-osc); }
+  .btn.sec:hover { background: #e0e0e0; }
+  .btn.peligro { background: var(--magenta-claro); color: var(--magenta); }
+  .btn.peligro.confirmar { background: var(--magenta); color: #fff; }
+
+  .vacio { text-align: center; color: var(--gris); padding: 30px 12px; background: var(--tarjeta);
+           border-radius: 4px; border: 1px dashed #cfcfcf; }
+  form.caja { background: var(--tarjeta); border: 1px solid var(--borde); border-top: 4px solid var(--cian); border-radius: 4px; padding: 16px; }
+  label { display: block; font-weight: 600; font-size: .88rem; margin-bottom: 12px; color: var(--negro); }
+  input { display: block; width: 100%; margin-top: 6px; padding: 11px 12px; font: inherit; font-weight: 400;
+          border: 1px solid #cfcfcf; border-radius: 4px; }
+  input:focus { outline: 2px solid var(--cian); border-color: transparent; }
+  .fila-btn { display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px; }
+  .error { color: var(--magenta-osc); font-size: .88rem; min-height: 1.2em; margin: 4px 0 8px; font-weight: 500; }
+  .nota { font-size: .78rem; color: var(--gris); }
+
+  dialog { border: 0; border-top: 5px solid var(--magenta); border-radius: 4px; padding: 22px; width: min(430px, calc(100vw - 32px));
+           box-shadow: 0 20px 60px rgba(0,0,0,.35); font-family: var(--texto); color: var(--gris-osc); }
+  dialog::backdrop { background: rgba(29,29,27,.7); }
+  dialog h3 { margin: 0 0 4px; font-family: var(--titulos); font-weight: 400; font-size: 1.8rem; letter-spacing: .5px; color: var(--negro); }
+  .resumen { background: var(--fondo); border-left: 4px solid var(--cian); border-radius: 4px; padding: 10px 12px; margin: 10px 0 16px; font-weight: 600; }
+
+  #toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%) translateY(140px);
+           background: var(--verde); color: #fff; padding: 13px 18px; border-radius: 4px; font-weight: 600;
+           box-shadow: 0 8px 24px rgba(0,0,0,.25); transition: transform .3s; max-width: calc(100vw - 32px); z-index: 10; }
+  #toast.ver { transform: translateX(-50%) translateY(0); }
+  #toast.mal { background: var(--magenta); }
+
+  .mia { display: flex; align-items: center; gap: 12px; background: var(--tarjeta); border: 1px solid var(--borde);
+         border-left: 5px solid var(--cian); border-radius: 4px; padding: 14px; margin-top: 10px; }
+  .mia .info b { font-family: var(--titulos); font-weight: 400; font-size: 1.3rem; letter-spacing: .4px; color: var(--negro); }
+
+  footer { background: var(--negro); color: #bdbdbd; text-align: center; font-size: .78rem; padding: 18px 16px; }
+  footer a { color: #fff; text-decoration: none; font-weight: 500; }
+  footer a:hover { color: var(--magenta); }
+
+  @media (max-width: 520px) {
+    .cab { min-height: 76px; }
+    .marca { padding: 10px 14px; }
+    .marca img { height: 42px; }
+    .cab-txt h1 { font-size: 1.6rem; }
+    .cab-txt p { display: none; }
+    .hueco { flex-wrap: wrap; }
+    .hueco .btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div id="aviso-demo" class="demo" hidden>Modo demostración con datos de ejemplo (no se guarda nada)</div>
+<header>
+  <div class="cab">
+    <a class="marca" href="https://valssport.com/" target="_blank" rel="noopener" aria-label="Vals Sport">
+      <img src="https://valssport.com/wp-content/uploads/vs_logo_blanco.png" alt="Vals Sport"
+           onerror="this.outerHTML='&lt;span class=&quot;alt&quot;&gt;VALS SPORT&lt;/span&gt;'">
+    </a>
+    <div class="cab-txt">
+      <h1 id="titulo">Clases de pádel</h1>
+      <p>Elige día y hora y reserva tu plaza al momento.</p>
+    </div>
+  </div>
+  <div class="franja"></div>
+</header>
+
+<div class="contenedor">
+  <nav class="tabs">
+    <button type="button" data-tab="reservar" class="on">Reservar</button>
+    <button type="button" data-tab="mis">Mis reservas</button>
+  </nav>
+
+  <section id="tab-reservar">
+    <div id="lista"><p class="vacio">Cargando clases…</p></div>
+  </section>
+
+  <section id="tab-mis" hidden>
+    <form id="form-mis" class="caja">
+      <label>Tu teléfono
+        <input id="tel-mis" type="tel" inputmode="tel" autocomplete="tel" placeholder="600 123 456" required>
+      </label>
+      <div class="fila-btn"><button class="btn" type="submit">Ver mis reservas</button></div>
+    </form>
+    <div id="lista-mis"></div>
+  </section>
+</div>
+
+<dialog id="dlg">
+  <form id="form-reserva" method="dialog">
+    <h3>Confirmar reserva</h3>
+    <div class="resumen" id="resumen"></div>
+    <label>Nombre y apellido
+      <input id="nombre" autocomplete="name" maxlength="60" required>
+    </label>
+    <label>Teléfono
+      <input id="telefono" type="tel" inputmode="tel" autocomplete="tel" placeholder="600 123 456" required>
+    </label>
+    <p class="nota">Con tu teléfono podrás consultar o anular tu reserva en «Mis reservas».</p>
+    <div class="error" id="dlg-error"></div>
+    <div class="fila-btn">
+      <button class="btn sec" type="button" id="btn-cerrar">Volver</button>
+      <button class="btn" type="submit" id="btn-confirmar">Reservar plaza</button>
+    </div>
+  </form>
+</dialog>
+
+<footer>Reservas de pádel · <a href="https://valssport.com/" target="_blank" rel="noopener">Vals Sport</a> · Centros deportivos en Málaga</footer>
+
+<div id="toast"></div>
+
+<script>
+// ---------- Conexión con el script de Google (API JSON, sin cookies: evita el fallo de varias cuentas) ----------
+const API = 'https://script.google.com/macros/s/AKfycbxjeFTJbLsuETW2HBl-VqCoCzI0QsdmoOjqpfmWznAoMwnggrJflXTt3F0Vmmipc_hM/exec';
+const ES_DEMO = /[?&]demo\b/.test(location.search);
+const ACCIONES = {
+  obtenerHuecos: ['huecos', []],
+  reservar: ['reservar', ['clave', 'nombre', 'telefono']],
+  misReservas: ['mis', ['telefono']],
+  cancelar: ['cancelar', ['clave', 'telefono']]
+};
+
+function llamar(fn, ...args) {
+  if (ES_DEMO) {
+    return new Promise((ok, ko) => setTimeout(() => { try { ok(DEMO[fn](...args)); } catch (e) { ko(e); } }, 300));
+  }
+  const [accion, nombres] = ACCIONES[fn];
+  const q = new URLSearchParams({ accion });
+  nombres.forEach((n, i) => q.set(n, args[i] == null ? '' : String(args[i])));
+  return fetch(API + '?' + q.toString(), { credentials: 'omit', cache: 'no-store', redirect: 'follow' })
+    .catch(() => { throw new Error('Sin conexión. Revisa internet e inténtalo de nuevo.'); })
+    .then(r => { if (!r.ok) throw new Error('El servidor no responde. Inténtalo en unos segundos.'); return r.json(); })
+    .then(j => { if (!j.ok) throw new Error(j.error || 'Error inesperado.'); return j.datos; });
+}
+
+// ---------- Utilidades ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g,
+  c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const msg = e => String((e && e.message) || e).replace(/^(Exception|Error):\s*/i, '');
+const LS = {
+  get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+let datos = null, seleccion = null, toastT;
+
+function toast(texto, mal) {
+  const t = $('#toast');
+  t.textContent = texto; t.className = mal ? 'ver mal' : 'ver';
+  clearTimeout(toastT); toastT = setTimeout(() => { t.className = mal ? 'mal' : ''; }, 4500);
+}
+
+// ---------- Pestañas ----------
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  $('#tab-reservar').hidden = b.dataset.tab !== 'reservar';
+  $('#tab-mis').hidden = b.dataset.tab !== 'mis';
+  if (b.dataset.tab === 'mis' && !$('#tel-mis').value) $('#tel-mis').value = LS.get('padel_tel');
+}));
+
+// ---------- Lista de huecos ----------
+function cargar() {
+  llamar('obtenerHuecos').then(pintar).catch(e => {
+    $('#lista').innerHTML = '<p class="vacio">No se han podido cargar las clases. ' + esc(msg(e)) + '</p>';
+  });
+}
+
+function pintar(d) {
+  datos = d;
+  $('#titulo').textContent = d.titulo;
+  document.title = d.titulo + ' · Vals Sport';
+  if (!d.huecos.length) {
+    $('#lista').innerHTML = '<p class="vacio">Ahora mismo no hay clases abiertas.<br>Vuelve a mirar más tarde.</p>';
+    return;
+  }
+  let html = '', fecha = '';
+  d.huecos.forEach((h, i) => {
+    if (h.fecha !== fecha) { fecha = h.fecha; html += '<h2 class="dia">' + esc(h.dia) + '</h2>'; }
+    const pct = h.capacidad ? Math.min(100, Math.round(h.ocupadas / h.capacidad * 100)) : 100;
+    const lleno = h.libres <= 0, pocas = !lleno && h.libres <= 3;
+    html += '<article class="hueco' + (lleno ? ' lleno' : '') + (pocas ? ' pocas' : '') + '">' +
+      '<div class="hora">' + esc(h.hora) + '</div>' +
+      '<div class="info">' + (h.clase ? '<div class="clase">' + esc(h.clase) + '</div>' : '') +
+        '<div class="barra"><span style="width:' + pct + '%"></span></div>' +
+        '<div class="plazas">' + (lleno ? 'Completo' :
+          (pocas ? '¡Últimas plazas! ' : '') + 'Quedan <b>' + h.libres + '</b> de ' + h.capacidad) + '</div>' +
+      '</div>' +
+      '<button class="btn" type="button" data-i="' + i + '"' + (lleno ? ' disabled' : '') + '>' +
+        (lleno ? 'Completo' : 'Reservar') + '</button>' +
+    '</article>';
+  });
+  $('#lista').innerHTML = html;
+}
+
+$('#lista').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-i]');
+  if (!b || b.disabled) return;
+  seleccion = datos.huecos[+b.dataset.i];
+  $('#resumen').textContent = seleccion.dia + ' · ' + seleccion.hora + (seleccion.clase ? ' · ' + seleccion.clase : '');
+  $('#nombre').value = LS.get('padel_nombre');
+  $('#telefono').value = LS.get('padel_tel');
+  $('#dlg-error').textContent = '';
+  $('#dlg').showModal();
+  ($('#nombre').value ? $('#btn-confirmar') : $('#nombre')).focus();
+});
+
+$('#btn-cerrar').addEventListener('click', () => $('#dlg').close());
+
+$('#form-reserva').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const nombre = $('#nombre').value.trim(), tel = $('#telefono').value.trim();
+  const btn = $('#btn-confirmar');
+  btn.disabled = true; btn.textContent = 'Reservando…';
+  $('#dlg-error').textContent = '';
+  llamar('reservar', seleccion.clave, nombre, tel).then(r => {
+    LS.set('padel_nombre', nombre); LS.set('padel_tel', tel);
+    $('#dlg').close();
+    toast(r.mensaje + ' ' + seleccion.dia + ', ' + seleccion.hora);
+    pintar(r.datos);
+  }).catch(e => {
+    $('#dlg-error').textContent = msg(e);
+    cargar(); // refresca plazas por si se ha llenado
+  }).finally(() => { btn.disabled = false; btn.textContent = 'Reservar plaza'; });
+});
+
+// ---------- Mis reservas ----------
+let telMis = '';
+$('#form-mis').addEventListener('submit', ev => {
+  ev.preventDefault();
+  telMis = $('#tel-mis').value.trim();
+  $('#lista-mis').innerHTML = '<p class="vacio">Buscando…</p>';
+  llamar('misReservas', telMis).then(pintarMis).catch(e => {
+    $('#lista-mis').innerHTML = '<p class="vacio">' + esc(msg(e)) + '</p>';
+  });
+});
+
+function pintarMis(lista) {
+  if (!lista.length) {
+    $('#lista-mis').innerHTML = '<p class="vacio" style="margin-top:10px">No tienes reservas próximas con este teléfono.</p>';
+    return;
+  }
+  const permite = !datos || datos.permitirCancelar;
+  $('#lista-mis').innerHTML = lista.map((r, i) =>
+    '<div class="mia"><div class="info"><b>' + esc(r.dia) + ' · ' + esc(r.hora) + '</b>' +
+      (r.clase ? '<div>' + esc(r.clase) + '</div>' : '') +
+      '<div class="nota">A nombre de ' + esc(r.nombre) + '</div></div>' +
+      (r.puedeCancelar
+        ? '<button class="btn peligro" type="button" data-c="' + i + '">Anular</button>'
+        : '<span class="nota">' + (permite ? 'Ya no se puede anular' : 'Para anular, avisa a tu profesor') + '</span>') +
+    '</div>').join('');
+  $('#lista-mis').onclick = ev => {
+    const b = ev.target.closest('button[data-c]');
+    if (!b) return;
+    if (!b.classList.contains('confirmar')) { // doble pulsación para confirmar
+      b.classList.add('confirmar'); b.textContent = '¿Seguro? Pulsa otra vez';
+      setTimeout(() => { b.classList.remove('confirmar'); b.textContent = 'Anular'; }, 4000);
+      return;
+    }
+    b.disabled = true; b.textContent = 'Anulando…';
+    llamar('cancelar', lista[+b.dataset.c].clave, telMis).then(r => {
+      toast(r.mensaje); pintarMis(r.reservas); pintar(r.datos);
+    }).catch(e => { toast(msg(e), true); b.disabled = false; b.textContent = 'Anular'; });
+  };
+}
+
+// ---------- Datos de demostración (solo al abrir el archivo fuera de Google) ----------
+const DEMO = (() => {
+  const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const p2 = n => ('0' + n).slice(-2);
+  const normTel = t => String(t || '').replace(/\D/g, '');
+  const huecos = [], reservas = [];
+  for (let d = 1, k = 0; d <= 7; d++) {
+    const f = new Date(); f.setDate(f.getDate() + d);
+    if (f.getDay() === 0) continue;
+    const iso = f.getFullYear() + '-' + p2(f.getMonth() + 1) + '-' + p2(f.getDate());
+    const dia = DIAS[f.getDay()].replace(/^./, c => c.toUpperCase()) + ' ' + f.getDate() + ' de ' + MESES[f.getMonth()];
+    [['10:00', 'Iniciación'], ['18:30', 'Intermedio'], ['20:00', '']].forEach(([h, c]) => {
+      huecos.push({ fecha: iso, dia, hora: h, clase: c, clave: iso + ' ' + h + (c ? ' · ' + c : ''),
+                    capacidad: 28, ocupadas: [3, 26, 28, 12, 0, 19, 27, 8][k++ % 8] });
+    });
+  }
+  const datos = () => ({ titulo: 'Clases de pádel', permitirCancelar: true, horasCancelar: 2,
+    huecos: huecos.map(h => Object.assign({}, h, { libres: Math.max(0, h.capacidad - h.ocupadas) })) });
+  return {
+    obtenerHuecos: datos,
+    reservar(clave, nombre, tel) {
+      tel = normTel(tel);
+      if (nombre.trim().length < 2) throw new Error('Escribe tu nombre y apellido.');
+      if (tel.length < 9) throw new Error('Escribe un teléfono válido (mínimo 9 cifras).');
+      const h = huecos.find(x => x.clave === clave);
+      if (reservas.some(r => r.clave === clave && r.tel === tel)) throw new Error('Ya tienes plaza en esta clase.');
+      if (h.ocupadas >= h.capacidad) throw new Error('Lo sentimos, esta clase se acaba de completar.');
+      h.ocupadas++; reservas.push({ clave, tel, nombre });
+      return { mensaje: '¡Reserva confirmada!', datos: datos() };
+    },
+    misReservas(tel) {
+      tel = normTel(tel);
+      if (tel.length < 9) throw new Error('Escribe un teléfono válido (mínimo 9 cifras).');
+      return reservas.filter(r => r.tel === tel).map(r => {
+        const h = huecos.find(x => x.clave === r.clave);
+        return { clave: r.clave, dia: h.dia, hora: h.hora, clase: h.clase, nombre: r.nombre, puedeCancelar: true };
+      });
+    },
+    cancelar(clave, tel) {
+      const i = reservas.findIndex(r => r.clave === clave && r.tel === normTel(tel));
+      if (i < 0) throw new Error('No encontramos esa reserva.');
+      reservas.splice(i, 1); huecos.find(x => x.clave === clave).ocupadas--;
+      return { mensaje: 'Reserva anulada. Tu plaza queda libre para otra persona.',
+               reservas: this.misReservas(tel), datos: datos() };
+    }
+  };
+})();
+
+if (ES_DEMO) $('#aviso-demo').hidden = false;
+cargar();
+</script>
+</body>
+</html>
