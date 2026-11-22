@@ -75,9 +75,9 @@
            border-radius: 4px; border: 1px dashed #cfcfcf; }
   form.caja { background: var(--tarjeta); border: 1px solid var(--borde); border-top: 4px solid var(--cian); border-radius: 4px; padding: 16px; }
   label { display: block; font-weight: 600; font-size: .88rem; margin-bottom: 12px; color: var(--negro); }
-  input { display: block; width: 100%; margin-top: 6px; padding: 11px 12px; font: inherit; font-weight: 400;
-          border: 1px solid #cfcfcf; border-radius: 4px; }
-  input:focus { outline: 2px solid var(--cian); border-color: transparent; }
+  input, select { display: block; width: 100%; margin-top: 6px; padding: 11px 12px; font: inherit; font-weight: 400;
+          border: 1px solid #cfcfcf; border-radius: 4px; background: #fff; color: var(--negro); }
+  input:focus, select:focus { outline: 2px solid var(--cian); border-color: transparent; }
   .fila-btn { display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px; }
   .error { color: var(--magenta-osc); font-size: .88rem; min-height: 1.2em; margin: 4px 0 8px; font-weight: 500; }
   .nota { font-size: .78rem; color: var(--gris); }
@@ -160,6 +160,9 @@
     <label>Teléfono
       <input id="telefono" type="tel" inputmode="tel" autocomplete="tel" placeholder="600 123 456" required>
     </label>
+    <label id="campo-monitor" hidden>Monitor con el que sueles entrenar
+      <select id="monitor"></select>
+    </label>
     <p class="nota">Con tu teléfono podrás consultar o anular tu reserva en «Mis reservas».</p>
     <div class="error" id="dlg-error"></div>
     <div class="fila-btn">
@@ -179,7 +182,7 @@ const API = 'https://script.google.com/macros/s/AKfycbxjeFTJbLsuETW2HBl-VqCoCzI0
 const ES_DEMO = /[?&]demo\b/.test(location.search);
 const ACCIONES = {
   obtenerHuecos: ['huecos', []],
-  reservar: ['reservar', ['clave', 'nombre', 'telefono']],
+  reservar: ['reservar', ['clave', 'nombre', 'telefono', 'monitor']],
   misReservas: ['mis', ['telefono']],
   cancelar: ['cancelar', ['clave', 'telefono']]
 };
@@ -229,8 +232,18 @@ function cargar() {
   });
 }
 
+function pintarMonitores(lista) {
+  const sel = $('#monitor'), previo = sel.value;
+  $('#campo-monitor').hidden = !lista.length;
+  sel.required = lista.length > 0;
+  sel.innerHTML = '<option value="">Elige tu monitor…</option>' +
+    lista.map(m => '<option value="' + esc(m) + '">' + esc(m) + '</option>').join('');
+  sel.value = lista.indexOf(previo) !== -1 ? previo : '';
+}
+
 function pintar(d) {
   datos = d;
+  pintarMonitores(d.monitores || []);
   $('#titulo').textContent = d.titulo;
   document.title = d.titulo + ' · Vals Sport';
   if (!d.huecos.length) {
@@ -263,6 +276,8 @@ $('#lista').addEventListener('click', ev => {
   $('#resumen').textContent = seleccion.dia + ' · ' + seleccion.hora + (seleccion.clase ? ' · ' + seleccion.clase : '');
   $('#nombre').value = LS.get('padel_nombre');
   $('#telefono').value = LS.get('padel_tel');
+  const monGuardado = LS.get('padel_monitor');
+  $('#monitor').value = ((datos.monitores || []).indexOf(monGuardado) !== -1) ? monGuardado : '';
   $('#dlg-error').textContent = '';
   $('#dlg').showModal();
   ($('#nombre').value ? $('#btn-confirmar') : $('#nombre')).focus();
@@ -272,12 +287,12 @@ $('#btn-cerrar').addEventListener('click', () => $('#dlg').close());
 
 $('#form-reserva').addEventListener('submit', ev => {
   ev.preventDefault();
-  const nombre = $('#nombre').value.trim(), tel = $('#telefono').value.trim();
+  const nombre = $('#nombre').value.trim(), tel = $('#telefono').value.trim(), monitor = $('#monitor').value;
   const btn = $('#btn-confirmar');
   btn.disabled = true; btn.textContent = 'Reservando…';
   $('#dlg-error').textContent = '';
-  llamar('reservar', seleccion.clave, nombre, tel).then(r => {
-    LS.set('padel_nombre', nombre); LS.set('padel_tel', tel);
+  llamar('reservar', seleccion.clave, nombre, tel, monitor).then(r => {
+    LS.set('padel_nombre', nombre); LS.set('padel_tel', tel); if (monitor) LS.set('padel_monitor', monitor);
     $('#dlg').close();
     toast(r.mensaje + ' ' + seleccion.dia + ', ' + seleccion.hora);
     pintar(r.datos);
@@ -307,7 +322,7 @@ function pintarMis(lista) {
   $('#lista-mis').innerHTML = lista.map((r, i) =>
     '<div class="mia"><div class="info"><b>' + esc(r.dia) + ' · ' + esc(r.hora) + '</b>' +
       (r.clase ? '<div>' + esc(r.clase) + '</div>' : '') +
-      '<div class="nota">A nombre de ' + esc(r.nombre) + '</div></div>' +
+      '<div class="nota">A nombre de ' + esc(r.nombre) + (r.monitor ? ' · Monitor: ' + esc(r.monitor) : '') + '</div></div>' +
       (r.puedeCancelar
         ? '<button class="btn peligro" type="button" data-c="' + i + '">Anular</button>'
         : '<span class="nota">' + (permite ? 'Ya no se puede anular' : 'Para anular, avisa a tu profesor') + '</span>') +
@@ -344,18 +359,20 @@ const DEMO = (() => {
                     capacidad: 28, ocupadas: [3, 26, 28, 12, 0, 19, 27, 8][k++ % 8] });
     });
   }
-  const datos = () => ({ titulo: 'Clases de pádel', permitirCancelar: true, horasCancelar: 2,
+  const monitores = ['Fran Bonilla', 'Jose Dieguez', 'Sergio/Laura', 'Antonio', 'Nacho'];
+  const datos = () => ({ titulo: 'Clases de pádel', permitirCancelar: true, horasCancelar: 2, monitores: monitores.slice(),
     huecos: huecos.map(h => Object.assign({}, h, { libres: Math.max(0, h.capacidad - h.ocupadas) })) });
   return {
     obtenerHuecos: datos,
-    reservar(clave, nombre, tel) {
+    reservar(clave, nombre, tel, monitor) {
       tel = normTel(tel);
       if (nombre.trim().length < 2) throw new Error('Escribe tu nombre y apellido.');
       if (tel.length < 9) throw new Error('Escribe un teléfono válido (mínimo 9 cifras).');
+      if (monitores.indexOf(monitor) === -1) throw new Error('Elige el monitor con el que sueles entrenar.');
       const h = huecos.find(x => x.clave === clave);
       if (reservas.some(r => r.clave === clave && r.tel === tel)) throw new Error('Ya tienes plaza en esta clase.');
       if (h.ocupadas >= h.capacidad) throw new Error('Lo sentimos, esta clase se acaba de completar.');
-      h.ocupadas++; reservas.push({ clave, tel, nombre });
+      h.ocupadas++; reservas.push({ clave, tel, nombre, monitor });
       return { mensaje: '¡Reserva confirmada!', datos: datos() };
     },
     misReservas(tel) {
@@ -363,7 +380,7 @@ const DEMO = (() => {
       if (tel.length < 9) throw new Error('Escribe un teléfono válido (mínimo 9 cifras).');
       return reservas.filter(r => r.tel === tel).map(r => {
         const h = huecos.find(x => x.clave === r.clave);
-        return { clave: r.clave, dia: h.dia, hora: h.hora, clase: h.clase, nombre: r.nombre, puedeCancelar: true };
+        return { clave: r.clave, dia: h.dia, hora: h.hora, clase: h.clase, nombre: r.nombre, monitor: r.monitor, puedeCancelar: true };
       });
     },
     cancelar(clave, tel) {
